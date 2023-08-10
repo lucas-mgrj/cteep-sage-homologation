@@ -32,6 +32,11 @@ app.add_middleware(
     allow_headers=['*']
 )
 
+@app.get('/')
+async def af_root():
+    return {'Status': 'Interface Ativa'}
+
+
 @app.get('/CreateHash')
 async def af_return_hash(local=False, data: str = Query()):
     import hashlib
