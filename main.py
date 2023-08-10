@@ -12,14 +12,9 @@
 # Notas:
 #     — Existem dois modos de envio, teste e produção.
 # ------------------------------------------------------------------------------
-import os
-from datetime import datetime
-from fastapi import FastAPI, Query, File, UploadFile
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-import uvicorn
-import yaml
-import urllib.request
 
 # Comando para iniciar o servidor: uvicorn main:app --host localhost --port 8080 --reload
 
@@ -32,30 +27,7 @@ app.add_middleware(
     allow_headers=['*']
 )
 
+
 @app.get('/')
 async def af_root():
     return {'Status': 'Interface Ativa'}
-
-
-@app.get('/CreateHash')
-async def af_return_hash(local=False, data: str = Query()):
-    import hashlib
-    sha256_hash = hashlib.sha256(data.encode()).hexdigest()
-    if local:
-        return sha256_hash
-    else:
-        return {'hash': sha256_hash}
-
-
-@app.get('/GetNameOfFiles')
-async def af_get_name_of_files():
-    files = os.listdir('./files/')
-    return {'files': [files]}
-
-
-@app.get('/FetchFile')
-async def af_fetch_file(file_name: str = Query(default=None), extension: str = Query(default='pdf')):
-    if file_name is None:
-        return {'Error': 'Nome do arquivo não informado'}
-    else:
-        return FileResponse(path=f"./files/{file_name}.{extension}", filename=f"{file_name}.{extension}")
