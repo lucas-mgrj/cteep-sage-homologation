@@ -1,7 +1,56 @@
-from fastapi import FastAPI
+# ---------------------------------Automalógica---------------------------------
+# Nome do Arquivo: AutoFetchAPI.py
+# Descrição: API de Interface entre SAGE e SISCON
+#
+# Autor: Lucas Nascimento
+# Data: 08/08/2023
+#
+# Versão: 1.0
+#
+# Histórico de Modificações:
+#     1.0 - 27/03/2023 - Esboço de código.
+# Notas:
+#     — Existem dois modos de envio, teste e produção.
+# ------------------------------------------------------------------------------
+import os
+from datetime import datetime
+from fastapi import FastAPI, Query, File, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+import uvicorn
+import yaml
+import urllib.request
+
+# Comando para iniciar o servidor: uvicorn main:app --host localhost --port 8080 --reload
 
 app = FastAPI()
 
-@app.get("/")
-async def root():
-    return {"greeting": "Hello, World!", "message": "Welcome to FastAPI!"}
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_methods=['*'],
+    allow_headers=['*']
+)
+
+@app.get('/CreateHash')
+async def af_return_hash(local=False, data: str = Query()):
+    import hashlib
+    sha256_hash = hashlib.sha256(data.encode()).hexdigest()
+    if local:
+        return sha256_hash
+    else:
+        return {'hash': sha256_hash}
+
+
+@app.get('/GetNameOfFiles')
+async def af_get_name_of_files():
+    files = os.listdir('./files/')
+    return {'files': [files]}
+
+
+@app.get('/FetchFile')
+async def af_fetch_file(file_name: str = Query(default=None), extension: str = Query(default='pdf')):
+    if file_name is None:
+        return {'Error': 'Nome do arquivo não informado'}
+    else:
+        return FileResponse(path=f"./files/{file_name}.{extension}", filename=f"{file_name}.{extension}")
